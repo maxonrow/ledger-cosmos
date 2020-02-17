@@ -1,9 +1,6 @@
-[submodule "src/ledger-user"]
-	path = src/ledger-user
-	url = https://github.com/maxonrow/ledger-mxw-app
-[submodule "src/ledger-val"]
-	path = src/ledger-val
-	url = git@github.com:tendermint/ledger-validator-app.git
+[submodule "src/ledger"]
+	path = src/ledger
+	url = git@github.com:maxonrow/ledger-mxw-app.git
 [submodule "deps/nanos-secure-sdk"]
 	path = deps/nanos-secure-sdk
 	url = git@github.com:LedgerHQ/nanos-secure-sdk.git
