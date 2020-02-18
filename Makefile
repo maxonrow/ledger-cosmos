@@ -19,88 +19,69 @@
 LEDGER_COSMOS_SRC=$(CURDIR)/src/ledger-user
 LEDGER_TENDERMINT_SRC=$(CURDIR)/src/ledger-val
 
-DOCKER_IMAGE=zondax/ledger-docker-bolos
+DOCKER_IMAGE=zondax/ledger-docker-bolos:latest
 DOCKER_BOLOS_SDK=/project/deps/nanos-secure-sdk
-
-DOCKER_IMAGE=zondax/ledger-docker-bolos
-DOCKER_BOLOS_SDK=/project/deps/nanos-secure-sdk
-DOCKER_IMAGE2=zondax/ledger_bolos2
-DOCKER_BOLOS_SDK2=/project/deps/nano2-sdk
+DOCKER_BOLOS_SDKX=/project/deps/nano2-sdk
 
 SCP_PUBKEY=049bc79d139c70c83a4b19e8922e5ee3e0080bb14a2e8b0752aa42cda90a1463f689b0fa68c1c0246845c2074787b649d0d8a6c0b97d4607065eee3057bdf16b83
 SCP_PRIVKEY=ff701d781f43ce106f72dc26a46b6a83e053b5d07bb3d4ceab79c91ca822a66b
 
 all: build
 
+define run_docker_privileged
+	docker run -i --rm \
+	--privileged \
+	-e SCP_PRIVKEY=$(SCP_PRIVKEY) \
+	-e BOLOS_SDK=$(1) -e BOLOS_ENV=/opt/bolos \
+	-u $(shell id -u) \
+	-v $(shell pwd):/project \
+	$(DOCKER_IMAGE) \
+	$(2)
+endef
+
 deps:
 	@echo "Install dependencies"
 	$(CURDIR)/src/install_deps.sh
 
 build_cosmos:
-	docker run -i --rm \
-	-e BOLOS_SDK=$(DOCKER_BOLOS_SDK) -e BOLOS_ENV=/opt/bolos \
-	-u $(shell id -u) -v $(shell pwd):/project \
-	$(DOCKER_IMAGE) \
-	make -C /project/src/ledger-user
+	@cp $(LEDGER_COSMOS_SRC)/nanos_icon.gif $(LEDGER_COSMOS_SRC)/glyphs/icon_app.gif
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-user)
 
-build_cosmos2:
-	docker run -i --rm \
-	-e BOLOS_SDK=$(DOCKER_BOLOS_SDK2) -e BOLOS_ENV=/opt/bolos \
-	-u $(shell id -u) -v $(shell pwd):/project \
-	$(DOCKER_IMAGE2) \
-	make -C /project/src/ledger-user
+build_cosmosX:
+	@cp $(LEDGER_COSMOS_SRC)/nanos_icon.gif $(LEDGER_COSMOS_SRC)/glyphs/icon_app.gif
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDKX),make -C /project/src/ledger-user)
 
 build_tendermint:
-	docker run -i --rm \
-	-e BOLOS_SDK=$(DOCKER_BOLOS_SDK) -e BOLOS_ENV=/opt/bolos \
-	-u $(shell id -u) -v $(shell pwd):/project \
-	$(DOCKER_IMAGE) \
-	make -C /project/src/ledger-val
+	@cp $(LEDGER_TENDERMINT_SRC)/nanos_icon.gif $(LEDGER_TENDERMINT_SRC)/glyphs/icon_app.gif
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-val)
 
-build_tendermint2:
-	docker run -i --rm \
-	-e BOLOS_SDK=$(DOCKER_BOLOS_SDK2) -e BOLOS_ENV=/opt/bolos \
-	-u $(shell id -u) -v $(shell pwd):/project \
-	$(DOCKER_IMAGE2) \
-	make -C /project/src/ledger-val
+build_tendermintX:
+	@cp $(LEDGER_TENDERMINT_SRC)/nanos_icon.gif $(LEDGER_TENDERMINT_SRC)/glyphs/icon_app.gif
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDKX),make -C /project/src/ledger-val)
 
 clean_cosmos:
-	BOLOS_SDK=$(CURDIR)/deps/nanos-secure-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_COSMOS_SRC) clean
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-user clean)
 
 clean_tendermint:
-	BOLOS_SDK=$(CURDIR)/deps/nanos-secure-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_TENDERMINT_SRC) clean
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-val clean)
 
 load_cosmos: build_cosmos
-	SCP_PRIVKEY=$(SCP_PRIVKEY) \
-	BOLOS_SDK=$(CURDIR)/deps/nanos-secure-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_COSMOS_SRC) load
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-user load)
 
-load_cosmos2: build_cosmos2
-	SCP_PRIVKEY=$(SCP_PRIVKEY) \
-	BOLOS_SDK=$(CURDIR)/deps/nano2-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_COSMOS_SRC) load
+load_cosmosX: build_cosmosX
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDKX),make -C /project/src/ledger-user load)
 
 load_tendermint: build_tendermint
-	SCP_PRIVKEY=$(SCP_PRIVKEY) \
-	BOLOS_SDK=$(CURDIR)/deps/nanos-secure-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_TENDERMINT_SRC) load
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-val load)
 
-load_tendermint2: build_tendermint2
-	SCP_PRIVKEY=$(SCP_PRIVKEY) \
-	BOLOS_SDK=$(CURDIR)/deps/nano2-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_TENDERMINT_SRC) load
+load_tendermintX: build_tendermintX
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDKX),make -C /project/src/ledger-val load)
 
 delete_cosmos:
-	SCP_PRIVKEY=$(SCP_PRIVKEY) \
-	BOLOS_SDK=$(CURDIR)/deps/nanos-secure-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_COSMOS_SRC) delete
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-user delete)
 
 delete_tendermint:
-	SCP_PRIVKEY=$(SCP_PRIVKEY) \
-	BOLOS_SDK=$(CURDIR)/deps/nanos-secure-sdk BOLOS_ENV=/opt/bolos \
-	make -C $(LEDGER_TENDERMINT_SRC) delete
+	$(call run_docker_privileged,$(DOCKER_BOLOS_SDK),make -C /project/src/ledger-val delete)
 
 # This target will initialize the device with the integration testing mnemonic
 dev_init:
@@ -114,7 +95,12 @@ dev_ca:
 dev_ca_delete:
 	@python -m ledgerblue.resetCustomCA --targetId 0x31100004
 
+# This target will setup a custom developer certificate
+dev_ca2:
+	@python -m ledgerblue.setupCustomCA --targetId 0x33000004 --public $(SCP_PUBKEY) --name zondax
+
+dev_ca_delete2:
+	@python -m ledgerblue.resetCustomCA --targetId 0x33000004
+
 clean: clean_cosmos clean_tendermint
 build: build_cosmos build_tendermint
-load: build load_cosmos load_tendermint
-delete: delete_cosmos delete_tendermint
