@@ -19,10 +19,10 @@
 LEDGER_COSMOS_SRC=$(CURDIR)/src/ledger-user
 LEDGER_TENDERMINT_SRC=$(CURDIR)/src/ledger-val
 
-DOCKER_IMAGE=zondax/ledger-docker-bolos
+DOCKER_IMAGE=skywills87/ledger-docker-bolos
 DOCKER_BOLOS_SDK=/project/deps/nanos-secure-sdk
 
-DOCKER_IMAGE=zondax/ledger-docker-bolos
+DOCKER_IMAGE=skywills87/ledger-docker-bolos
 DOCKER_BOLOS_SDK=/project/deps/nanos-secure-sdk
 DOCKER_IMAGE2=zondax/ledger_bolos2
 DOCKER_BOLOS_SDK2=/project/deps/nano2-sdk
